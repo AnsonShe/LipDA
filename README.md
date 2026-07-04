@@ -18,13 +18,6 @@ LipDA is a unified framework for joint **LipSync forgery detection and source at
 
 ---
 
-## Release Status
-
-> **We are actively organizing and open-sourcing this repository.**  
-> **We expect to fully open-source all code and pretrained weights during the summer of 2026. Thank you for your patience for updates.**  
-
----
-
 ## Installation
 
 ```bash
