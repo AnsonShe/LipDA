@@ -1,0 +1,22 @@
+# ===== Core: Stage-1 detection pipeline =====
+# Install PyTorch first — see https://pytorch.org for CUDA-specific builds
+torch>=2.0
+torchvision>=0.15
+opencv-python>=4.8
+dlib>=19.24
+numpy>=1.23
+tqdm>=4.65
+scikit-learn>=1.3
+tensorboard>=2.14
+
+# librosa audio features (extract_feature.py, models.py, attribute_data/)
+librosa>=0.10
+soundfile>=0.12
+scipy>=1.10
+
+# ===== Optional: Stage-2 generator attribution (attribute_data/) =====
+mediapipe>=0.10
+matplotlib>=3.7
+seaborn>=0.12
+
+# System dependency (not pip): ffmpeg — required for audio extraction in attribute_data/
