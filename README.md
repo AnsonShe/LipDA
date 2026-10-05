@@ -1,6 +1,9 @@
 # Ariadne's Thread of LipSync: Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses
 
-[Paper](https://openreview.net/pdf?id=xmKNNOElLM) · [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A)
+[![Conference](https://img.shields.io/badge/Conference-ICML%202026-blue)]()
+[![Paper](https://img.shields.io/badge/Paper-OpenReview-red)](https://openreview.net/pdf?id=xmKNNOElLM)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-LipSync--A-yellow)](https://huggingface.co/datasets/AnsonShe/LipSync-A)
+[![ModelScope](https://img.shields.io/badge/ModelScope-LipSync--A-blueviolet)](https://www.modelscope.cn/datasets/AnsonShe/LipSync-A)
 
 ## Overview
 
@@ -27,7 +30,7 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 
 ## Dataset Preprocess
 
-Download [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A). Place clips as `real/<id>.mp4` and `fake/<generator>/<id>.mp4` (ids match `splits/*.json`).
+Download [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A), [ModelScope](https://www.modelscope.cn/datasets/AnsonShe/LipSync-A), or [Google Drive](https://drive.google.com/drive/folders/1PrqA_n6OmUt8udB7pUFA65aDCWMkqcsj). Place clips as `real/<id>.mp4` and `fake/<generator>/<id>.mp4` (ids match `splits/*.json`).
 
 ~~~bash
 export LIPDA_DATA_ROOT=/path/to/videos
