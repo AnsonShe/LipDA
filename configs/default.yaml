@@ -1,0 +1,69 @@
+seed: 42
+lip_size: 96
+expand_factor: 0.2
+num_landmarks: 478
+
+data:
+  train_json: splits/train.json
+  val_json: splits/val.json
+  test_json: splits/test.json
+  cache_dir: cache
+  # mp4 root. Override with LIPDA_DATA_ROOT. Split JSON uses anonymized real/<id>.mp4.
+  video_root: ""
+
+log_dir: logs
+
+train:
+  num_workers: 4
+  weight_decay: 1.0e-5
+
+vision:
+  checkpoint: weights/vision_deepfake_detector.pth
+  # Directory that contains {train,val,test}_cache.npy (dlib 68 + 5-frame lip).
+  # Override with LIPDA_DLIB_CACHE.
+  preprocessed_dir: ""
+  combo_len: 5
+  lstm_hidden: 256
+  aggregate: max
+  threshold: 0.985
+
+audiovisual:
+  max_frames: 75
+  batch_size: 32
+  epochs: 20
+  lr: 1.0e-4
+  patience: 8
+  finetune_epochs: 10
+  finetune_lr: 1.0e-5
+  require_audio: true
+  save_dir: weights/runs_audiovisual
+
+attribution:
+  max_frames: 75
+  batch_size: 16
+  epochs: 40
+  lr: 5.0e-4
+  patience: 12
+  finetune_epochs: 15
+  finetune_lr: 1.0e-5
+  num_classes: 5
+  require_audio: false
+  generator_map: splits/generator_families.json
+  save_dir: weights/runs_attribution
+  select: macro_f1
+  class_weight: true
+  label_smoothing: 0.05
+  drop_last: false
+  init_from_audiovisual: weights/audiovisual_deepfake_detector.pth
+
+infer:
+  default_threshold: 0.5
+
+mediapipe:
+  refine_landmarks: true
+  static_image_mode: false
+  max_num_faces: 1
+  min_detection_confidence: 0.5
+  nose_index: 1
+  left_eye_index: 33
+  right_eye_index: 263

@@ -1,0 +1,32 @@
+{
+  "num_classes": 5,
+  "names": [
+    "transformer",
+    "gan",
+    "diffusion",
+    "vae",
+    "statistical"
+  ],
+  "display_names": [
+    "Transformer-based",
+    "GAN-based",
+    "Diffusion-based",
+    "VAE-based",
+    "Statistical models"
+  ],
+  "generator_to_family": {
+    "IP_LAP": "transformer",
+    "makeittalk": "gan",
+    "wav2lip": "gan",
+    "dreamtalk": "diffusion",
+    "sadtalker": "vae",
+    "dinet": "statistical"
+  },
+  "excluded_video_driven": [
+    "LIA",
+    "TPSM",
+    "facevid",
+    "x2face"
+  ],
+  "note": "Paper Appendix B.2: attribution taxonomizes audio-driven LipSync forgeries into five families. Video-driven generators (LIA/TPSM/FaceVid/X2Face) are excluded."
+}

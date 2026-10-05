@@ -1,176 +1,98 @@
-# Ariadne's Thread of LipSync
+# Ariadne's Thread of LipSync: Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses
 
-**Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses**
-
-Official repository for the ICML 2026 paper *Ariadne's Thread of LipSync: Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses*.
-
-[![Conference](https://img.shields.io/badge/Conference-ICML%202026-blue)]()
-
-<p align="center">
-  <img src="assets/headline-new_01.png" alt="Ariadne's Thread of LipSync" width="90%">
-</p>
-
----
+[Paper](https://openreview.net/pdf?id=xmKNNOElLM) · [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A)
 
 ## Overview
 
-LipDA is a unified framework for joint **LipSync forgery detection and source attribution**. Unlike existing methods that target local visual artifacts or explicit audio–visual mismatches, LipDA exploits the intrinsic physiological coupling between lip motion and head pose — a global signal that current LipSync generation pipelines disrupt by design.
+LipDA is a unified framework for joint LipSync forgery detection and source attribution. Unlike existing methods that target local visual artifacts or explicit audio–visual mismatches, LipDA exploits the intrinsic physiological coupling between lip motion and head pose — a global signal that current LipSync generation pipelines disrupt by design.
 
----
+<p align="center">
+  <img src="assets/headline_01.png" alt="LipSync-A dataset generation and detection pipeline" width="100%"/>
+</p>
+<p align="center"><em>LipSync-A construction and the detection–attribution pipeline.</em></p>
 
-## Installation
-
-```bash
-git clone https://github.com/AnsonShe/LipDA.git
-cd LipDA
-pip install -r requirements.txt
-```
-
-- **ffmpeg** — required for audio extraction in Stage-2 and robustness modules.
-
----
-
-## Data Layout
-
-Organize raw LipSync videos as follows (used by `dataset.py`):
-
-```
-{dataset_root}/
-├── 0_real/                  # real talking-head videos
-│   └── *.mp4
-└── 1_fake/                  # forged videos, grouped by generator
-    ├── Wav2Lip/
-    ├── SadTalker/
-    └── ...
-```
-
-After preprocessing, the pipeline produces:
-
-```
-{out_root}/
-├── train/  val/  test/      # per-video: frames/ + combos/combo_XXXXXX/
-├── train_videos.json
-├── val_videos.json
-├── test_videos.json
-├── train_combo_index.json
-├── val_combo_index.json
-└── test_combo_index.json
-```
-
-After combo sampling (`reduce_sample.py`):
-
-```
-reduced_data/
-├── train_combo_index_reduced.json
-└── val_combo_index_reduced.json
-```
-
----
-
-## Stage-1: Forgery Detection
-
-Step 1 — Build video list
-
-```bash
-python dataset.py \
-  --root_dir data/videos \
-  --out_json lists.json
-```
-
-Step 2 — Preprocess (frames + combos + split)
-
-```bash
-python preprocess.py \
-  --list_json lists.json \
-  --out_root preprocessed_data \
-  --train_ratio 0.7 \
-  --val_ratio 0.15
-```
+<p align="center">
+  <img src="assets/Method_01.png" alt="LipDA two-stage training and inference" width="100%"/>
+</p>
+<p align="center"><em>LipDA two-stage training and inference.</em></p>
 
 
-Step 3 — Reduce training samples
+## Requirements
 
-```bash
-python reduce_sample.py \
-  --original_data_dir preprocessed_data \
-  --reduced_data_dir reduced_data \
-  --samples_per_video 4
-```
+Python 3.8, CUDA 12.1, and `ffmpeg` on `PATH`.
 
-Step 4 — Feature extraction (optional standalone test)
+~~~bash
+pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
+~~~
 
+## Dataset Preprocess
 
-```bash
-python extract_feature.py \
-  --train_index reduced_data/train_combo_index_reduced.json \
-  --val_index   reduced_data/val_combo_index_reduced.json
-```
+Download [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A). Place clips as `real/<id>.mp4` and `fake/<generator>/<id>.mp4` (ids match `splits/*.json`).
 
-Step 5 — Train Stage-1 model
+~~~bash
+export LIPDA_DATA_ROOT=/path/to/videos
+export LIPDA_DLIB_CACHE=/path/to/dlib_t5_cache
+~~~
 
-```bash
-python train_stage1.py \
-  --train_index reduced_data/train_combo_index_reduced.json \
-  --val_index   reduced_data/val_combo_index_reduced.json \
-  --save_dir    checkpoints \
-  --epochs 20 \
-  --batch_size 32 \
-  --lr 1e-4 \
-  --lstm_hidden 256
-```
+Vision uses `$LIPDA_DLIB_CACHE/{split}_cache.npy`. Audio-visual detection and attribution use MediaPipe+MFCC caches from `extract_mesh.py` / `extract_audio.py`:
 
-Step 6 — Inference / evaluation
+~~~bash
+python preprocess/extract_mesh.py --split all
+python preprocess/extract_audio.py --split all
+~~~
 
-```bash
-python inference.py \
-  --checkpoint checkpoints/best_model.pth \
-  --test_videos_json preprocessed_data/test_videos.json \
-  --preprocessed_dir preprocessed_data \
-  --dlib_predictor shape_predictor_68_face_landmarks.dat \
-  --num_combos_per_video 30 \
-  --threshold 0.5 \
-  --lstm_hidden 256 \
-  --save_cache
-```
+Robustness (`video_distort.py`, `distort_split.py`, `make_audio_cache.py`):
 
----
+~~~bash
+python robust/distort_split.py --split test --type GB --level 3 --out_dir distorted/gb3
+python preprocess/extract_mesh.py --list distorted/gb3/split.json --cache_dir cache_gb3
+python preprocess/extract_audio.py --list distorted/gb3/split.json --cache_dir cache_gb3
+~~~
 
-## Stage-2: Generator Attribution
+~~~bash
+python robust/make_audio_cache.py --split test --preset noise_light --out_cache cache_noise
+~~~
 
+## Validation
 
-```bash
-cd attribute_data
+Vision paper Acc is **video-max @ 0.985** (Acc 0.9266 / AUC 0.9786). The same checkpoint also reports **video-mean @ 0.5** (Acc 0.9483 / AUC 0.9846), which is not the paper number. Audio-visual: Acc 0.9665 / AUC 0.9978; Acc 0.9783 / AUC 0.9991 with vision-max on silent clips. Attribution: Acc 0.9738 / macro-F1 0.9721.
 
-python train_stage2.py \
-  --transformer_dir data/transformer \
-  --gan_dir         data/GAN \
-  --diffusion_dir   data/diffusion \
-  --vae_dir         data/VAE \
-  --cnn_dir         data/CNN \
-  --batch_size 8 \
-  --epochs 60
-```
+~~~bash
+python vision/infer.py --split test --save_scores logs/vision/test_scores.json
+~~~
 
----
+~~~bash
+python audiovisual/infer.py --checkpoint weights/audiovisual_deepfake_detector.pth --vision_scores logs/vision/test_scores.json
+~~~
 
+~~~bash
+python attribution/infer.py --checkpoint weights/generator_attribution.pth
+~~~
 
-## TODO
+~~~bash
+python attribution/infer.py --json distorted/gb3/split.json --cache_dir cache_gb3
+python audiovisual/infer.py --cache_dir cache_noise
+~~~
 
-We are actively organizing and open-sourcing this repository. We are incrementally uploading code and will complete the full release during summer 2026. Thank you for your patience for updates.  
+## Train
 
-- [ ] LipSync-A dataset and download instructions
-- [ ] Pretrained checkpoints (all benchmarks)
-- [ ] Complete evaluation protocols & result reproduction guide
+`train.py` in `audiovisual/` and `attribution/`:
 
----
+~~~bash
+torchrun --nproc_per_node=8 audiovisual/train.py
+~~~
+
+~~~bash
+torchrun --nproc_per_node=2 attribution/train.py --gpus 0,1
+~~~
 
 ## Citation
 
-```bibtex
+~~~bibtex
 @inproceedings{she2026ariadne,
   title     = {Ariadne's Thread of LipSync: Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses},
   author    = {She, Tianyi and Liu, Jiawei and Liu, Weifeng and Zhao, Hanqing and Zhang, Weiming and Chen, Kejiang},
   booktitle = {Proceedings of the 43rd International Conference on Machine Learning},
   year      = {2026}
 }
-```
+~~~
