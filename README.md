@@ -30,7 +30,7 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 
 ## Dataset Preprocess
 
-Download [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A), [ModelScope](https://www.modelscope.cn/datasets/AnsonShe/LipSync-A), or [Google Drive](https://drive.google.com/drive/folders/1PrqA_n6OmUt8udB7pUFA65aDCWMkqcsj). Place clips as `real/<id>.mp4` and `fake/<generator>/<id>.mp4` (ids match `splits/*.json`).
+Download [LipSync-A](https://huggingface.co/datasets/AnsonShe/LipSync-A) or [ModelScope](https://www.modelscope.cn/datasets/AnsonShe/LipSync-A). Place clips as `real/<id>.mp4` and `fake/<generator>/<id>.mp4` (ids match `splits/*.json`).
 
 ~~~bash
 export LIPDA_DATA_ROOT=/path/to/videos
