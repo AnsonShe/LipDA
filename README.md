@@ -1,6 +1,7 @@
 # Ariadne's Thread of LipSync: Unraveling Forgeries via Inconsistency between Lip Motions and Head Poses
 
 [![Conference](https://img.shields.io/badge/Conference-ICML%202026-blue)]()
+<a href='https://arxiv.org/abs/2610.08417'><img alt="Static Badge" src="https://img.shields.io/badge/arXiv-2610.08417-grey?style=flat&labelColor=red">
 [![Paper](https://img.shields.io/badge/Paper-OpenReview-red)](https://openreview.net/pdf?id=xmKNNOElLM)
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-LipSync--A-yellow)](https://huggingface.co/datasets/AnsonShe/LipSync-A)
 [![ModelScope](https://img.shields.io/badge/ModelScope-LipSync--A-blueviolet)](https://www.modelscope.cn/datasets/AnsonShe/LipSync-A)
